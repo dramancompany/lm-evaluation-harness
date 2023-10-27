@@ -1,3 +1,26 @@
+
+python main.py \
+    --model hf-causal \
+    --model_args pretrained=mistralai/Mistral-7B-Instruct-v0.1 \
+    --tasks rama_task4 \
+    --device cuda:0
+
+
+python main.py \
+    --model hf-causal \
+    --model_args pretrained=beomi/KoAlpaca-Polyglot-5.8B \
+    --tasks rama_task4 \
+    --device cuda:0
+
+
+
+
+# Task 등록
+* lm_eval/tasks/rama_task4_predict_category.py 참고해서 task 생성
+* lm_eval/tasks/__init__의 TASK_REGISTRY에 등록
+
+
+
 # Language Model Evaluation Harness
 
 ## We're Refactoring LM-Eval!
