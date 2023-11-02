@@ -101,7 +101,11 @@ all_translation_benchmarks = {ts: sacrebleu.get_langpairs_for_testset(ts) for ts
 
 
 TASK_REGISTRY = {
+    "rama_task3": rama_task3_find_requirement_preper.FindReqPrep,
     "rama_task4": rama_task4_predict_category.PredictCategory,
+    "rama_task5": rama_task5_career_knowledge.MultipleChoiceTask,
+    "rama_task6": rama_task6_predict_industries.PredictIndustries,
+    "rama_task7": rama_task7_find_similar_company,
     "babi": babi.Babi,
     # GLUE
     "cola": glue.CoLA,
@@ -354,7 +358,6 @@ TASK_REGISTRY = {
     **ceval.create_all_tasks(),
     **cmmlu.create_all_tasks(),
 }
-
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))
 
