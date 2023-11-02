@@ -1,29 +1,31 @@
 """
 
-공고/프로필의 항목 분류
-관련문서: https://dramancompany.atlassian.net/wiki/spaces/BDCAI/pages/28241461371/RAMA+PET+Benchmark+Task+4
+Task 7. 공고의 요구사항 찾기
+관련문서: https://dramancompany.atlassian.net/wiki/spaces/BDCAI/pages/28246245377/RAMA+PeT+Benchmark+Task+3
 
 """
 from lm_eval.base import MultipleChoiceTask
 import json
 
 
-class PredictCategory(MultipleChoiceTask):
+class FindReqPrep(MultipleChoiceTask):
     QUERY = """
 instruction:
-주어진 공고/이력서의 내용 중, 주어진 target 항목의 내용을 담고 있는 적절한 지문을 선택하세요.
-적절한 항목이 없다면, 존재하지 않음이라고 답해주세요.
- 
+공고가 주어집니다.
+이 공고를 분석하고 target에서 지정한 필수 또는 우대조건에 해당하는 내용을 주어진 보기중에 모두 선택하세요.
+
+
 target:
 {target}
 
-공고/프로필:
-{body}
+공고:
+{jd}
+
 
 정답: """
 
     VERSION = 1.0
-    DATASET_PATH = "/raid/ailab-workspace/gyholee/project/rama_pet_benchmark/llm_pet/benchmark/data/benchmark_predict_category.json"
+    DATASET_PATH = "/raid/ailab-workspace/gyholee/project/rama_pet_benchmark/llm_pet/benchmark/data/FRP_benchmark.json"
     DATASET_NAME = None
 
     def __init__(self):
@@ -56,7 +58,7 @@ target:
             return map(self._process_doc, self.dataset["test"])
 
     def _process_doc(self, doc):
-        query = self.QUERY.format_map({"target": doc["target"], "body": doc["body"]})
+        query = self.QUERY.format_map({"target": doc["target"], "jd": doc["jd"]})
 
         return {
             "query": query,
@@ -66,9 +68,3 @@ target:
 
     def doc_to_text(self, doc):
         return doc["query"]
-
-
-if __name__ == "__main__":
-    pc = PredictCategory(
-        "/raid/ailab-workspace/gyholee/project/rama_pet_benchmark/llm_pet/benchmark/data/benchmark_predict_category.json"
-    )

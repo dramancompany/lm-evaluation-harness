@@ -4,7 +4,8 @@ from typing import List, Union
 import sacrebleu
 import lm_eval.base
 
-
+from . import rama_task3_find_requirement_preper
+from . import rama_task7_find_similar_company
 from . import rama_task4_predict_category
 from . import babi
 from . import superglue
@@ -98,7 +99,9 @@ all_translation_benchmarks = {ts: sacrebleu.get_langpairs_for_testset(ts) for ts
 
 
 TASK_REGISTRY = {
+    "rama_task3": rama_task3_find_requirement_preper.FindReqPrep,
     "rama_task4": rama_task4_predict_category.PredictCategory,
+    "rama_task7": rama_task7_find_similar_company.FindSimilarCompany,
     "babi": babi.Babi,
     # GLUE
     "cola": glue.CoLA,

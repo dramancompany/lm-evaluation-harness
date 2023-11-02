@@ -2,14 +2,37 @@
 python main.py \
     --model hf-causal \
     --model_args pretrained=mistralai/Mistral-7B-Instruct-v0.1 \
-    --tasks rama_task4 \
+    --tasks rama_task3 \
+    --write_out \
+    --no_cache \
     --device cuda:0
+
+
+python main.py \
+    --model hf-causal \
+    --model_args pretrained=EleutherAI/polyglot-ko-5.8b \
+    --tasks rama_task4 \
+    --write_out \
+    --no_cache \
+    --device cuda:0
+
+
+python main.py \
+    --model hf-causal \
+    --model_args pretrained=EleutherAI/polyglot-ko-1.3b \
+    --tasks rama_task4 \
+    --write_out \
+    --no_cache \
+    --device cuda:0
+
+/raid/ailab-workspace/data/rama_checkpoints/1_3B_v1_0/checkpoint-31000/
 
 
 python main.py \
     --model hf-causal \
     --model_args pretrained=beomi/KoAlpaca-Polyglot-5.8B \
     --tasks rama_task4 \
+    --no_cache \
     --device cuda:0
 
 
@@ -35,7 +58,7 @@ If you choose to port a task not yet completed according to [our checklist](http
 - A shell command to run the task in the `master` branch, and what the score is
 - A shell command to run the task in your PR branch to `big-refactor`, and what the resulting score is, to show that we achieve equality between the two implementations.
 
-Lastly, we'll no longer be accepting new feature requests beyond those that are already open to the master branch as we carry out this switch to the new version over the next week, though we will be accepting bugfixes to `master` branch and PRs to `big-refactor`. Feel free to reach out in the #lm-thunderdome channel of the EAI discord for more information.
+Lastly, we'll no longer be accepting new feature requests beyond those that are already open to the master branch as we carry out this switch to the new version over the next week, though we will be accepting bugfixes to `master` branch and PRs to `big-refactor`. Feel free to reach out in the #lm-thunderdome chnnel of the EAI discord for more information.
 
 
 ## Overview
