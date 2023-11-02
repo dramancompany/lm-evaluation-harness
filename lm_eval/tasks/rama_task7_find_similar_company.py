@@ -1,29 +1,29 @@
 """
 
-공고/프로필의 항목 분류
-관련문서: https://dramancompany.atlassian.net/wiki/spaces/BDCAI/pages/28241461371/RAMA+PET+Benchmark+Task+4
+Task 7. 유사회사 찾기
+관련문서: https://dramancompany.atlassian.net/wiki/spaces/BDCAI/pages/28245557261/RAMA+PeT+Benchmark+Task+7
 
 """
 from lm_eval.base import MultipleChoiceTask
 import json
 
 
-class PredictCategory(MultipleChoiceTask):
+class FindSimilarCompany(MultipleChoiceTask):
     QUERY = """
 instruction:
-주어진 공고/이력서의 내용 중, 주어진 target 항목의 내용을 담고 있는 적절한 지문을 선택하세요.
-적절한 항목이 없다면, 존재하지 않음이라고 답해주세요.
- 
+입력된 유사회사 정의에 따라, target으로 주어진 회사와 유사한 회사를 선택하세요.
+
+유사회사 정의:
+{definition}
+
 target:
 {target}
 
-공고/프로필:
-{body}
 
 정답: """
 
     VERSION = 1.0
-    DATASET_PATH = "/raid/ailab-workspace/gyholee/project/rama_pet_benchmark/llm_pet/benchmark/data/benchmark_predict_category.json"
+    DATASET_PATH = "/raid/ailab-workspace/gyholee/project/rama_pet_benchmark/llm_pet/benchmark/data/benchmark_find_similar_company.json"
     DATASET_NAME = None
 
     def __init__(self):
@@ -56,7 +56,7 @@ target:
             return map(self._process_doc, self.dataset["test"])
 
     def _process_doc(self, doc):
-        query = self.QUERY.format_map({"target": doc["target"], "body": doc["body"]})
+        query = self.QUERY.format_map({"target": doc["target"], "definition": doc["definition"]})
 
         return {
             "query": query,
@@ -66,9 +66,3 @@ target:
 
     def doc_to_text(self, doc):
         return doc["query"]
-
-
-if __name__ == "__main__":
-    pc = PredictCategory(
-        "/raid/ailab-workspace/gyholee/project/rama_pet_benchmark/llm_pet/benchmark/data/benchmark_predict_category.json"
-    )

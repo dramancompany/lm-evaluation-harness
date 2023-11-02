@@ -4,7 +4,8 @@ from typing import List, Union
 import sacrebleu
 import lm_eval.base
 
-from . import rama_task2_result_evidence
+from . import rama_task3_find_requirement_preper
+from . import rama_task7_find_similar_company
 from . import rama_task4_predict_category
 from . import rama_task5_career_knowledge
 from . import rama_task6_predict_industries
@@ -100,11 +101,7 @@ all_translation_benchmarks = {ts: sacrebleu.get_langpairs_for_testset(ts) for ts
 
 
 TASK_REGISTRY = {
-    # RAMA
-    "rama_task2": rama_task2_result_evidence.ReasonPrediction,
     "rama_task4": rama_task4_predict_category.PredictCategory,
-    "rama_task5": rama_task5_career_knowledge.PredictDefinition,
-    "rama_task6": rama_task6_predict_industries.PredictIndustries,
     "babi": babi.Babi,
     # GLUE
     "cola": glue.CoLA,
