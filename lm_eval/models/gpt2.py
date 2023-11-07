@@ -173,6 +173,8 @@ class HFLM_DS(HFLM):
         )
 
         self.model = ds_engine.module
+        self._device = torch.device("cuda")
+        self.device = self._device
 
 
 # for backwards compatibility
