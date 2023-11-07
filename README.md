@@ -8,7 +8,7 @@ pip install -r ./requirements.txt
 python main.py \
     --model hf-causal \
     --model_args pretrained=mistralai/Mistral-7B-Instruct-v0.1 \
-    --tasks spc,prp,rtt,ckp,fsc \
+    --tasks spc,prp,rtt,ckp,jcp,fsc \
     --write_out \
     --no_cache \
     --device cuda:0
