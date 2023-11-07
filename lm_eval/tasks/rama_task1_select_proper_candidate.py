@@ -1,35 +1,31 @@
 """
 
-Task 7. 공고의 요구사항 찾기
-관련문서: https://dramancompany.atlassian.net/wiki/spaces/BDCAI/pages/28246245377/RAMA+PeT+Benchmark+Task+3
+공고/프로필의 항목 분류
+관련문서: https://dramancompany.atlassian.net/wiki/spaces/BDCAI/pages/28241461371/RAMA+PET+Benchmark+Task+4
 
 """
 from lm_eval.base import MultipleChoiceTask
 import json
+from lm_eval.tasks.rama_common import RAMAUtilsMixin
 
 
-class FindReqPrep(MultipleChoiceTask):
+class SelectProperCandidates(MultipleChoiceTask, RAMAUtilsMixin):
     QUERY = """
 instruction:
-공고가 주어집니다.
-이 공고를 분석하고 target에서 지정한 필수 또는 우대조건에 해당하는 내용을 주어진 보기중에 모두 선택하세요.
-
-
-target:
-{target}
-
+주어진 채용공고와 회사정보를 고려할때, 더 적절한 후보자를 선택하세요.
+ 
 공고:
 {jd}
 
-
-정답: """
+후보: 
+"""
 
     VERSION = 1.0
-    DATASET_PATH = "/raid/ailab-workspace/gyholee/project/rama_pet_benchmark/llm_pet/benchmark/data/FRP_benchmark.json"
+    DATASET_PATH = "rama_project/rama_benchmark/llm_benchmark/v_{VERSION}/SPC_benchmark.json"
     DATASET_NAME = None
 
     def __init__(self):
-        self.dataset = json.load(open(self.DATASET_PATH))
+        self.dataset = self.load_benchmark_dataset(self.DATASET_PATH.format_map({"VERSION": self.VERSION}))
 
         self._training_docs = None
         self._fewshot_docs = None
@@ -58,9 +54,10 @@ target:
             return map(self._process_doc, self.dataset["test"])
 
     def _process_doc(self, doc):
-        query = self.QUERY.format_map({"target": doc["target"], "jd": doc["jd"]})
+        query = self.QUERY.format_map({"jd": doc["jd"]})
 
         return {
+            "type": doc["type"],
             "query": query,
             "choices": doc["candidates"],
             "gold": doc["answer"],

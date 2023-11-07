@@ -1,39 +1,22 @@
 
+# benchmark 실행 코드
+```
+pip install -r ./requirements.txt
+```
+
+```
 python main.py \
     --model hf-causal \
     --model_args pretrained=mistralai/Mistral-7B-Instruct-v0.1 \
-    --tasks rama_task3 \
+    --tasks spc,prp,rtt,ckp,fsc \
     --write_out \
     --no_cache \
     --device cuda:0
-
-
+```
 python main.py \
-    --model hf-causal \
-    --model_args pretrained=EleutherAI/polyglot-ko-5.8b \
-    --tasks rama_task4 \
-    --write_out \
-    --no_cache \
-    --device cuda:0
-
-
-python main.py \
-    --model hf-causal \
-    --model_args pretrained=EleutherAI/polyglot-ko-1.3b \
-    --tasks rama_task4 \
-    --write_out \
-    --no_cache \
-    --device cuda:0
-
-/raid/ailab-workspace/data/rama_checkpoints/1_3B_v1_0/checkpoint-31000/
-
-
-python main.py \
-    --model hf-causal \
-    --model_args pretrained=beomi/KoAlpaca-Polyglot-5.8B \
-    --tasks rama_task4 \
-    --no_cache \
-    --device cuda:0
+    --model gpt3 \
+    --model_args engine=gpt-35-turbo-0613 \
+    --tasks ckp
 
 
 

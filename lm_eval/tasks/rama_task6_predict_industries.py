@@ -6,9 +6,10 @@
 """
 from lm_eval.base import MultipleChoiceTask
 import json
+from lm_eval.tasks.rama_common import RAMAUtilsMixin
 
 
-class PredictIndustries(MultipleChoiceTask):
+class PredictIndustries(MultipleChoiceTask, RAMAUtilsMixin):
     QUERY = """
 instruction:
 다음 보기에서 아래의 {type} 가장 적합한 산업분야를 고르시오..
@@ -19,12 +20,13 @@ instruction:
 정답:    
 """
 
-    VERSION = 0.1
-    DATASET_PATH = "/raid/ailab-workspace/hh.hwang/eval_llm/dataset/benchmark_jcp.json"
+    VERSION = 1.0
+    DATASET_PATH = "rama_project/rama_benchmark/llm_benchmark/v_{VERSION}/JCP_benchmark.json"
     DATASET_NAME = None
 
     def __init__(self):
-        self.dataset = json.load(open(self.DATASET_PATH))
+        self.dataset = self.load_benchmark_dataset(self.DATASET_PATH.format_map({"VERSION": self.VERSION}))
+
         self._training_docs = None
         self._fewshot_docs = None
 
@@ -62,9 +64,3 @@ instruction:
 
     def doc_to_text(self, doc):
         return doc["query"]
-
-
-if __name__ == "__main__":
-    pc = PredictIndustries(
-        "/raid/ailab-workspace/hh.hwang/eval_llm/dataset/benchmark_jcp.json"
-    )

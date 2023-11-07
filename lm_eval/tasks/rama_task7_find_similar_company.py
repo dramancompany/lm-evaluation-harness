@@ -6,9 +6,10 @@ Task 7. 유사회사 찾기
 """
 from lm_eval.base import MultipleChoiceTask
 import json
+from lm_eval.tasks.rama_common import RAMAUtilsMixin
 
 
-class FindSimilarCompany(MultipleChoiceTask):
+class FindSimilarCompany(MultipleChoiceTask, RAMAUtilsMixin):
     QUERY = """
 instruction:
 입력된 유사회사 정의에 따라, target으로 주어진 회사와 유사한 회사를 선택하세요.
@@ -23,11 +24,11 @@ target:
 정답: """
 
     VERSION = 1.0
-    DATASET_PATH = "/raid/ailab-workspace/gyholee/project/rama_pet_benchmark/llm_pet/benchmark/data/benchmark_find_similar_company.json"
+    DATASET_PATH = "rama_project/rama_benchmark/llm_benchmark/v_{VERSION}/FSC_benchmark.json"
     DATASET_NAME = None
 
     def __init__(self):
-        self.dataset = json.load(open(self.DATASET_PATH))
+        self.dataset = self.load_benchmark_dataset(self.DATASET_PATH.format_map({"VERSION": self.VERSION}))
 
         self._training_docs = None
         self._fewshot_docs = None

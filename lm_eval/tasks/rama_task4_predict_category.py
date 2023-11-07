@@ -6,12 +6,13 @@
 """
 from lm_eval.base import MultipleChoiceTask
 import json
+from lm_eval.tasks.rama_common import RAMAUtilsMixin
 
 
-class PredictCategory(MultipleChoiceTask):
+class PredictCategory(MultipleChoiceTask, RAMAUtilsMixin):
     QUERY = """
 instruction:
-주어진 공고/이력서의 내용 중, 주어진 target 항목의 내용을 담고 있는 적절한 지문을 선택하세요.
+주어진 공고 또는 이력서의 내용 중, target에서 지정한 내용을 담고 있는 지문을 선택하세요.
 적절한 항목이 없다면, 존재하지 않음이라고 답해주세요.
  
 target:
@@ -23,11 +24,11 @@ target:
 정답: """
 
     VERSION = 1.0
-    DATASET_PATH = "/raid/ailab-workspace/gyholee/project/rama_pet_benchmark/llm_pet/benchmark/data/benchmark_predict_category.json"
+    DATASET_PATH = "rama_project/rama_benchmark/llm_benchmark/v_{VERSION}/RTT_benchmark.json"
     DATASET_NAME = None
 
     def __init__(self):
-        self.dataset = json.load(open(self.DATASET_PATH))
+        self.dataset = self.load_benchmark_dataset(self.DATASET_PATH.format_map({"VERSION": self.VERSION}))
 
         self._training_docs = None
         self._fewshot_docs = None
@@ -66,9 +67,3 @@ target:
 
     def doc_to_text(self, doc):
         return doc["query"]
-
-
-if __name__ == "__main__":
-    pc = PredictCategory(
-        "/raid/ailab-workspace/gyholee/project/rama_pet_benchmark/llm_pet/benchmark/data/benchmark_predict_category.json"
-    )
