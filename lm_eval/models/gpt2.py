@@ -167,7 +167,9 @@ class HFLM_DS(HFLM):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        ds_engine = deepspeed.init_inference(self.model, mp_size=min(4, torch.cuda.device_count()))
+        ds_engine = deepspeed.init_inference(
+            self.model, mp_size=min(4, torch.cuda.device_count()), replace_with_kernel_inject=True
+        )
 
         self.model = ds_engine.module
 
