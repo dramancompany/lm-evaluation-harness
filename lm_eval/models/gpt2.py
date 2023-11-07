@@ -152,6 +152,7 @@ class HFLM(BaseLM):
         logits returned from the model
         """
         with torch.no_grad():
+            print("\n\n\n\n\n############")
             print(self.model)
             return self.model(inps)[0]
 
@@ -173,6 +174,8 @@ class HFLM_DS(HFLM):
         )
 
         self.model = ds_engine.module
+        print("\n\n\n\n\n@@@@@@@@@@@@@@")
+        print(self.model)
         self._device = torch.device("cuda")
 
 
