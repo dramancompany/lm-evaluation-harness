@@ -152,6 +152,7 @@ class HFLM(BaseLM):
         logits returned from the model
         """
         with torch.no_grad():
+            print(self.model)
             return self.model(inps)[0]
 
     def _model_generate(self, context, max_length, eos_token_id):
@@ -166,7 +167,7 @@ class HFLM_DS(HFLM):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        ds_engine = deepspeed.init_inference(self.model)
+        ds_engine = deepspeed.init_inference(self.model, mp_size=min(4, torch.cuda.device_count()))
 
         self.model = ds_engine.module
 
