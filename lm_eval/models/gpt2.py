@@ -3,6 +3,8 @@ import transformers
 from typing import Optional, Union
 from lm_eval.base import BaseLM
 
+import deepspeed
+
 
 def _get_dtype(dtype: Union[str, torch.dtype]) -> torch.dtype:
     """Converts `dtype` from `str` to torch.dtype when possible. Does not use an instantiated HF AutoConfig"""
@@ -40,9 +42,9 @@ class HFLM(BaseLM):
             self._device = self.model.device
 
             if tokenizer:
-                assert isinstance(
-                    tokenizer, transformers.PreTrainedTokenizer
-                ) or isinstance(tokenizer, transformers.PreTrainedTokenizerFast)
+                assert isinstance(tokenizer, transformers.PreTrainedTokenizer) or isinstance(
+                    tokenizer, transformers.PreTrainedTokenizerFast
+                )
                 self.tokenizer = tokenizer
             else:
                 # Get tokenizer
@@ -56,21 +58,14 @@ class HFLM(BaseLM):
         elif isinstance(pretrained, str):
             # Initialize device
             assert isinstance(device, str)
-            device_list = set(
-                ["cuda", "cpu"]
-                + [f"cuda:{i}" for i in range(torch.cuda.device_count())]
-            )
+            device_list = set(["cuda", "cpu"] + [f"cuda:{i}" for i in range(torch.cuda.device_count())])
             if device and device in device_list:
                 self._device = torch.device(device)
                 print(f"Using device '{device}'")
             else:
                 print("Device not specified")
                 print(f"Cuda Available? {torch.cuda.is_available()}")
-                self._device = (
-                    torch.device("cuda")
-                    if torch.cuda.is_available()
-                    else torch.device("cpu")
-                )
+                self._device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
             revision = revision + ("/" + subfolder if subfolder is not None else "")
 
             # Initialize new model and tokenizer instances
@@ -89,9 +84,7 @@ class HFLM(BaseLM):
             )
 
         else:
-            raise TypeError(
-                "Parameter pretrained should be of type str or transformers.PreTrainedModel"
-            )
+            raise TypeError("Parameter pretrained should be of type str or transformers.PreTrainedModel")
 
         self.model.eval()
 
@@ -165,7 +158,18 @@ class HFLM(BaseLM):
         generation_kwargs = {"do_sample": False, "max_length": max_length}
         if eos_token_id is not None:
             generation_kwargs["eos_token_id"] = eos_token_id
-            generation_kwargs[
-                "pad_token_id"
-            ] = eos_token_id  # setting eos_token_id as pad token
+            generation_kwargs["pad_token_id"] = eos_token_id  # setting eos_token_id as pad token
         return self.model.generate(context, **generation_kwargs)
+
+
+class HFLM_DS(HFLM):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        ds_engine = deepspeed.init_inference(self.model)
+
+        self.model = ds_engine.module
+
+
+# for backwards compatibility
+GPT2LM = HFLM
