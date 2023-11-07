@@ -169,6 +169,9 @@ class HFLM_DS(HFLM):
 
         zero_config = deepspeed.runtime.zero.config.DeepSpeedZeroConfig(
             stage=3,
+            offload_param={
+                "device": "cpu",
+            },
         )
 
         ds_engine = deepspeed.init_inference(
