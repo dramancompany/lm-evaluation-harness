@@ -24,3 +24,4 @@ zstandard
 accelerate>=0.17.1
 python-dotenv
 deepspeed
+mpi4py

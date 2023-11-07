@@ -5,7 +5,7 @@ pip install -r ./requirements.txt
 ```
 
 ```
-python main.py \
+deepspeed --num_gpus 2 main.py  \
     --model hf-causal_ds \
     --model_args pretrained=mistralai/Mistral-7B-Instruct-v0.1 \
     --tasks spc,prp,rtt,ckp,jcp,fsc \

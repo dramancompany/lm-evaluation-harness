@@ -12,9 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", required=True)
     parser.add_argument("--model_args", default="")
-    parser.add_argument(
-        "--tasks", default=None, choices=utils.MultiChoice(tasks.ALL_TASKS)
-    )
+    parser.add_argument("--tasks", default=None, choices=utils.MultiChoice(tasks.ALL_TASKS))
     parser.add_argument("--provide_description", action="store_true")
     parser.add_argument("--num_fewshot", type=int, default=0)
     parser.add_argument("--batch_size", type=str, default=None)
@@ -30,8 +28,7 @@ def parse_args():
         "--limit",
         type=float,
         default=None,
-        help="Limit the number of examples per task. "
-        "If <1, limit is a percentage of the total number of examples.",
+        help="Limit the number of examples per task. " "If <1, limit is a percentage of the total number of examples.",
     )
     parser.add_argument("--data_sampling", type=float, default=None)
     parser.add_argument("--no_cache", action="store_true")
@@ -40,7 +37,7 @@ def parse_args():
     parser.add_argument("--check_integrity", action="store_true")
     parser.add_argument("--write_out", action="store_true", default=False)
     parser.add_argument("--output_base_path", type=str, default=None)
-
+    parser.add_argument("--local_rank", type=int, default=-1, help="local rank passed from distributed launcher")
     return parser.parse_args()
 
 
@@ -50,9 +47,7 @@ def main():
     assert not args.provide_description  # not implemented
 
     if args.limit:
-        print(
-            "WARNING: --limit SHOULD ONLY BE USED FOR TESTING. REAL METRICS SHOULD NOT BE COMPUTED USING LIMIT."
-        )
+        print("WARNING: --limit SHOULD ONLY BE USED FOR TESTING. REAL METRICS SHOULD NOT BE COMPUTED USING LIMIT.")
 
     if args.tasks is None:
         task_names = tasks.ALL_TASKS
