@@ -179,14 +179,7 @@ class HFLM_DS(HFLM):
             "wall_clock_breakdown": False,
         }
 
-        # ds_config["zero_optimization"]["offload_param"] = dict(device="cpu", pin_memory=True)
-
-        ds_config["zero_optimization"]["offload_param"] = dict(
-            device="nvme",
-            pin_memory=True,
-            nvme_path=args.nvme_offload_path,
-            buffer_size=4e9,
-        )
+        ds_config["zero_optimization"]["offload_param"] = dict(device="cpu", pin_memory=True)
 
         dschf = HfDeepSpeedConfig(ds_config)  # this tells from_pretrained to instantiate directly on gpus
 
