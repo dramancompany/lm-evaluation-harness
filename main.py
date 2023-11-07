@@ -24,6 +24,7 @@ def parse_args():
     )
     parser.add_argument("--device", type=str, default=None)
     parser.add_argument("--output_path", default=None)
+
     parser.add_argument(
         "--limit",
         type=float,

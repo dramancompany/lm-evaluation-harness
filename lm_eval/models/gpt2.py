@@ -2,6 +2,7 @@ import torch
 import transformers
 from typing import Optional, Union
 from lm_eval.base import BaseLM
+from transformers.deepspeed import HfDeepSpeedConfig
 
 import deepspeed
 
@@ -167,18 +168,32 @@ class HFLM_DS(HFLM):
         kwargs["device"] = "cpu"
         super().__init__(*args, **kwargs)
 
-        zero_config = deepspeed.runtime.zero.config.DeepSpeedZeroConfig(
-            stage=3,
-            offload_param={
-                "device": "cpu",
+        ds_config = {
+            "zero_optimization": {
+                "stage": 3,
+                "overlap_comm": True,
+                "contiguous_gradients": True,
             },
+            "steps_per_print": 2000,
+            "train_micro_batch_size_per_gpu": 1,
+            "wall_clock_breakdown": False,
+        }
+
+        # ds_config["zero_optimization"]["offload_param"] = dict(device="cpu", pin_memory=True)
+
+        ds_config["zero_optimization"]["offload_param"] = dict(
+            device="nvme",
+            pin_memory=True,
+            nvme_path=args.nvme_offload_path,
+            buffer_size=4e9,
         )
 
-        ds_engine = deepspeed.init_inference(
-            self.model, mp_size=torch.cuda.device_count(), replace_with_kernel_inject=True, zero=zero_config
-        )
+        dschf = HfDeepSpeedConfig(ds_config)  # this tells from_pretrained to instantiate directly on gpus
 
+        ds_engine = deepspeed.initialize(model=self.model, config_params=ds_config)[0]
+        ds_engine.module.eval()
         self.model = ds_engine.module
+
         self._device = torch.device("cuda")
 
 
