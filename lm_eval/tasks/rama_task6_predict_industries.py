@@ -21,11 +21,15 @@ instruction:
 """
 
     VERSION = 1.0
-    DATASET_PATH = "rama_project/rama_benchmark/llm_benchmark/v_{VERSION}/JCP_benchmark.json"
+    DATASET_PATH = (
+        "rama_project/rama_benchmark/llm_benchmark/v_{VERSION}/JCP_benchmark.json"
+    )
     DATASET_NAME = None
 
     def __init__(self):
-        self.dataset = self.load_benchmark_dataset(self.DATASET_PATH.format_map({"VERSION": self.VERSION}))
+        self.dataset = self.load_benchmark_dataset(
+            self.DATASET_PATH.format_map({"VERSION": self.VERSION})
+        )
 
         self._training_docs = None
         self._fewshot_docs = None
@@ -42,7 +46,9 @@ instruction:
     def training_docs(self):
         if self.has_training_docs():
             if self._training_docs is None:
-                self._training_docs = list(map(self._process_doc, self.dataset["train"]))
+                self._training_docs = list(
+                    map(self._process_doc, self.dataset["train"])
+                )
             return self._training_docs
 
     def validation_docs(self):

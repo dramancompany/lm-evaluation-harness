@@ -15,7 +15,6 @@ def _get_dtype(dtype: Union[str, torch.dtype]) -> torch.dtype:
 
 
 class HFLM(BaseLM):
-
     _DEFAULT_MAX_LENGTH = 2048
 
     def __init__(
@@ -55,7 +54,6 @@ class HFLM(BaseLM):
                 )
 
         elif isinstance(pretrained, str):
-
             # Initialize device
             assert isinstance(device, str)
             device_list = set(
@@ -171,7 +169,3 @@ class HFLM(BaseLM):
                 "pad_token_id"
             ] = eos_token_id  # setting eos_token_id as pad token
         return self.model.generate(context, **generation_kwargs)
-
-
-# for backwards compatibility
-GPT2LM = HFLM

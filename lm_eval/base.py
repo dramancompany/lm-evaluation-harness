@@ -176,7 +176,9 @@ class BaseLM(LM):
     def _detect_batch_size(self, requests=None, pos=0):
         if requests:
             _, context_enc, continuation_enc = requests[pos]
-            max_length = len((context_enc + continuation_enc)[-(self.max_length + 1) :][:-1])
+            max_length = len(
+                (context_enc + continuation_enc)[-(self.max_length + 1) :][:-1]
+            )
         else:
             max_length = self.max_length
 
@@ -212,7 +214,9 @@ class BaseLM(LM):
         for context, continuation in requests:
             if context == "":
                 # end of text as context
-                context_enc, continuation_enc = [self.eot_token_id], self.tok_encode(continuation)
+                context_enc, continuation_enc = [self.eot_token_id], self.tok_encode(
+                    continuation
+                )
             else:
                 context_enc, continuation_enc = self._encode_pair(context, continuation)
 
@@ -289,15 +293,25 @@ class BaseLM(LM):
             sched = pos // int(n_reordered_requests / self.batch_schedule)
             if sched in self.batch_sizes:
                 return self.batch_sizes[sched]
-            print(f"Passed argument batch_size = auto:{self.batch_schedule}. Detecting largest batch size")
+            print(
+                f"Passed argument batch_size = auto:{self.batch_schedule}. Detecting largest batch size"
+            )
             self.batch_sizes[sched] = self._detect_batch_size(reordered_requests, pos)
             print(f"Determined largest batch size: {self.batch_sizes[sched]}")
             return self.batch_sizes[sched]
 
         for chunk in utils.chunks(
             tqdm(reordered_requests, disable=disable_tqdm),
-            n=self.batch_size if self.batch_size != "auto" else override_bs if override_bs is not None else 0,
-            fn=_batch_scheduler if self.batch_size == "auto" and n_reordered_requests > 0 and not override_bs else None,
+            n=self.batch_size
+            if self.batch_size != "auto"
+            else override_bs
+            if override_bs is not None
+            else 0,
+            fn=_batch_scheduler
+            if self.batch_size == "auto"
+            and n_reordered_requests > 0
+            and not override_bs
+            else None,
         ):
             inps = []
             cont_toks_list = []
@@ -332,13 +346,17 @@ class BaseLM(LM):
                 cont = continuation_enc
 
                 # since in _collate we make sure length is descending, the longest is always the first one.
-                padding_length = padding_length if padding_length is not None else inplen
+                padding_length = (
+                    padding_length if padding_length is not None else inplen
+                )
 
                 # pad length from seq to padding_length
                 inp = torch.cat(
                     [
                         inp,  # [seq]
-                        torch.zeros(padding_length - inplen, dtype=torch.long).to(inp.device),  # [padding_length - seq]
+                        torch.zeros(padding_length - inplen, dtype=torch.long).to(
+                            inp.device
+                        ),  # [padding_length - seq]
                     ],
                     dim=0,
                 )
@@ -348,7 +366,9 @@ class BaseLM(LM):
                 inplens.append(inplen)
 
             batched_inps = torch.cat(inps, dim=0)  # [batch, padding_length]
-            multi_logits = F.log_softmax(self._model_call(batched_inps), dim=-1).cpu()  # [batch, padding_length, vocab]
+            multi_logits = F.log_softmax(
+                self._model_call(batched_inps), dim=-1
+            ).cpu()  # [batch, padding_length, vocab]
 
             for (cache_key, _, _), logits, inp, inplen, cont_toks in zip(
                 chunk, multi_logits, inps, inplens, cont_toks_list
@@ -358,16 +378,22 @@ class BaseLM(LM):
                 inplen = inplen + (
                     logits.shape[0] - padding_length
                 )  # if "virtual tokens" (from prompt tuning) are added, inplen is larger
-                logits = logits[inplen - contlen : inplen].unsqueeze(0)  # [1, seq, vocab]
+                logits = logits[inplen - contlen : inplen].unsqueeze(
+                    0
+                )  # [1, seq, vocab]
 
                 # Check if per-token argmax is exactly equal to continuation
                 greedy_tokens = logits.argmax(dim=-1)
-                cont_toks = torch.tensor(cont_toks, dtype=torch.long).unsqueeze(0)  # [1, seq]
+                cont_toks = torch.tensor(cont_toks, dtype=torch.long).unsqueeze(
+                    0
+                )  # [1, seq]
                 max_equal = (greedy_tokens == cont_toks).all()
 
                 # Obtain log-probs at the corresponding continuation token indices
                 # last_token_slice = logits[:, -1, :].squeeze(0).tolist()
-                logits = torch.gather(logits, 2, cont_toks.unsqueeze(-1)).squeeze(-1)  # [1, seq]
+                logits = torch.gather(logits, 2, cont_toks.unsqueeze(-1)).squeeze(
+                    -1
+                )  # [1, seq]
 
                 # Answer: (log prob, is-exact-match)
                 answer = (float(logits.sum()), bool(max_equal))
@@ -419,12 +445,16 @@ class BaseLM(LM):
             else:
                 primary_until = None
 
-            context_enc = torch.tensor([self.tok_encode(context)[self.max_gen_toks - self.max_length :]]).to(
-                self.device
-            )
+            context_enc = torch.tensor(
+                [self.tok_encode(context)[self.max_gen_toks - self.max_length :]]
+            ).to(self.device)
 
-            max_gen_tokens = min(self.max_gen_toks, request_args.get("max_length", self.max_gen_toks))
-            cont = self._model_generate(context_enc, context_enc.shape[1] + max_gen_tokens, primary_until)
+            max_gen_tokens = min(
+                self.max_gen_toks, request_args.get("max_length", self.max_gen_toks)
+            )
+            cont = self._model_generate(
+                context_enc, context_enc.shape[1] + max_gen_tokens, primary_until
+            )
 
             s = self.tok_decode(cont[0].tolist()[context_enc.shape[1] :])
 
@@ -574,7 +604,9 @@ class Task(abc.ABC):
         return rnd.sample(self._training_docs, k)
 
     def doc_to_decontamination_query(self, doc):
-        print("Override doc_to_decontamination_query with document specific decontamination query.")
+        print(
+            "Override doc_to_decontamination_query with document specific decontamination query."
+        )
         assert False
 
     @abstractmethod
@@ -641,7 +673,9 @@ class Task(abc.ABC):
         return ""
 
     @utils.positional_deprecated
-    def fewshot_context(self, doc, num_fewshot, provide_description=None, rnd=None, description=None):
+    def fewshot_context(
+        self, doc, num_fewshot, provide_description=None, rnd=None, description=None
+    ):
         """Returns a fewshot context string that is made up of a prepended description
         (if provided), the `num_fewshot` number of examples, and an appended prompt example.
 
@@ -659,7 +693,9 @@ class Task(abc.ABC):
         :returns: str
             The fewshot context.
         """
-        assert rnd is not None, "A `random.Random` generator argument must be provided to `rnd`"
+        assert (
+            rnd is not None
+        ), "A `random.Random` generator argument must be provided to `rnd`"
         assert not provide_description, (
             "The `provide_description` arg will be removed in future versions. To prepend "
             "a custom description to the context, supply the corresponding string via the "
@@ -682,7 +718,9 @@ class Task(abc.ABC):
             else:
                 if self._fewshot_docs is None:
                     self._fewshot_docs = list(
-                        self.validation_docs() if self.has_validation_docs() else self.test_docs()
+                        self.validation_docs()
+                        if self.has_validation_docs()
+                        else self.test_docs()
                     )
 
                 fewshotex = rnd.sample(self._fewshot_docs, num_fewshot + 1)
@@ -691,7 +729,13 @@ class Task(abc.ABC):
                 fewshotex = [x for x in fewshotex if x != doc][:num_fewshot]
 
             labeled_examples = (
-                "\n\n".join([self.doc_to_text(doc) + self.doc_to_target(doc) for doc in fewshotex]) + "\n\n"
+                "\n\n".join(
+                    [
+                        self.doc_to_text(doc) + self.doc_to_target(doc)
+                        for doc in fewshotex
+                    ]
+                )
+                + "\n\n"
             )
 
         example = self.doc_to_text(doc)
@@ -703,7 +747,9 @@ class MultipleChoiceTask(Task):
         return " " + doc["choices"][doc["gold"]]
 
     def construct_requests(self, doc, ctx):
-        lls = [rf.loglikelihood(ctx, " {}".format(choice))[0] for choice in doc["choices"]]
+        lls = [
+            rf.loglikelihood(ctx, " {}".format(choice))[0] for choice in doc["choices"]
+        ]
 
         return lls
 
@@ -744,9 +790,15 @@ class PerplexityTask(Task, abc.ABC):
         assert k == 0
         return []
 
-    def fewshot_context(self, doc, num_fewshot, provide_description=None, rnd=None, description=None):
-        assert num_fewshot == 0, "The number of fewshot examples must be 0 for perplexity tasks."
-        assert rnd is not None, "A `random.Random` generator argument must be provided to `rnd`."
+    def fewshot_context(
+        self, doc, num_fewshot, provide_description=None, rnd=None, description=None
+    ):
+        assert (
+            num_fewshot == 0
+        ), "The number of fewshot examples must be 0 for perplexity tasks."
+        assert (
+            rnd is not None
+        ), "A `random.Random` generator argument must be provided to `rnd`."
         assert not provide_description, (
             "The `provide_description` arg will be removed in future versions. To prepend "
             "a custom description to the context, supply the corresponding string via the "
@@ -902,7 +954,9 @@ REQUEST_RETURN_LENGTHS = {
 class Request:
     def __init__(self, request_type, args, index=None):
         if request_type not in REQUEST_RETURN_LENGTHS.keys():
-            raise NotImplementedError("The request type {} is not implemented!".format(request_type))
+            raise NotImplementedError(
+                "The request type {} is not implemented!".format(request_type)
+            )
 
         self.request_type = request_type
         self.args = args
@@ -920,7 +974,11 @@ class Request:
         return Request(self.request_type, self.args, i)
 
     def __eq__(self, other):
-        return self.request_type == other.request_type and self.args == other.args and self.index == other.index
+        return (
+            self.request_type == other.request_type
+            and self.args == other.args
+            and self.index == other.index
+        )
 
     def __repr__(self):
         return f"Req_{self.request_type}{self.args}[{self.index}]\n"

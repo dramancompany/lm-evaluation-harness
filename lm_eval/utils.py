@@ -35,7 +35,9 @@ def escaped_split(text, sep_char, maxsplit=-1):
     is not specified or less than 0, then there is no limit on the
     number of splits (all possible splits are made).
     """
-    assert len(sep_char) == 1, "separation string must be a single character for escaped splitting"
+    assert (
+        len(sep_char) == 1
+    ), "separation string must be a single character for escaped splitting"
 
     if maxsplit == 0:
         return text
@@ -94,7 +96,9 @@ class MultiChoice:
     # Simple wildcard support (linux filename patterns)
     def __contains__(self, values):
         for value in values.split(","):
-            if len(fnmatch.filter(self.choices, value)) == 0 and not _is_json_task(value):
+            if len(fnmatch.filter(self.choices, value)) == 0 and not _is_json_task(
+                value
+            ):
                 return False
 
         return True
@@ -253,7 +257,9 @@ def find_test_root(start_path: pathlib.Path) -> pathlib.Path:
             return cur_path
         else:
             cur_path = cur_path.parent.resolve()
-    raise FileNotFoundError(f"Unable to find package root within {max_layers} upwards" + f"of {start_path}")
+    raise FileNotFoundError(
+        f"Unable to find package root within {max_layers} upwards" + f"of {start_path}"
+    )
 
 
 @positional_deprecated

@@ -227,3 +227,7 @@ class GPT3LM(BaseLM):
     def _model_generate(self, context, max_length, eos_token_id):
         # Isn't used because we override greedy_until
         raise NotImplementedError()
+
+
+class GPT3LM_DS(GPT3LM):
+    pass
