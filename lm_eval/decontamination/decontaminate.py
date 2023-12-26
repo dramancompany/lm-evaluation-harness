@@ -1,17 +1,17 @@
-import time
-import random
-import pickle
-import json
-import glob
-import os
 import collections
+import glob
+import json
+import os
+import pickle
+import random
+import time
 
-from .janitor import Janitor, word_ngrams
 from .archiver import ZStdTextReader
+from .janitor import Janitor, word_ngrams
 
 
 # Was used for testing the evaluator decoupled from the full logic below
-def get_train_overlap_stub(docs, ngrams_path, ngrams_n_size):
+def get_train_overlap_stub(docs: dict, ngrams_path: str, ngrams_n_size: str):
     simulated_overlap = 0.1
     contaminated = int(len(docs) * simulated_overlap)
     return random.sample(range(len(docs)), contaminated)
@@ -34,7 +34,7 @@ def get_train_overlap_stub(docs, ngrams_path, ngrams_n_size):
 # 4. Strip the task_set from the dictionary keys and return
 #
 # We cache the task+set lookups as well as the overlaps.
-def get_train_overlap(docs_by_task_set, ngrams_path, limit):
+def get_train_overlap(docs_by_task_set: dict, ngrams_path: str, limit: int) -> dict:
     # return get_train_overlap_stub(docs, ngrams_path, ngrams_n_size)
 
     info_dict_path = os.path.join(ngrams_path, "info.json")
@@ -47,7 +47,7 @@ def get_train_overlap(docs_by_task_set, ngrams_path, limit):
     print("Building Lookups...")
     start = time.perf_counter()
 
-    def get_overlaps_dump_path(task_name, task_set, ngrams_n_size, limit):
+    def get_overlaps_dump_path(task_name, task_set, ngrams_n_size, limit) -> str:
         return f"data/{task_name}/{task_set}_{ngrams_n_size}grams_limit{limit}.overlaps"
 
     lookups = {}
@@ -109,7 +109,7 @@ def get_train_overlap(docs_by_task_set, ngrams_path, limit):
         print(f"Merging lookups took {elapsed:0.5f} seconds.")
 
         print(f"{ngrams_n_size} grams files found in {ngrams_path}:")
-        files = glob.glob(os.path.join(ngrams_path, f"*.sorted.zst"))
+        files = glob.glob(os.path.join(ngrams_path, "*.sorted.zst"))
         print(files)
 
         for file in files:
@@ -135,11 +135,7 @@ def get_train_overlap(docs_by_task_set, ngrams_path, limit):
                         matching_unique += 1
                         for task_name, task_set, doc_ids in merged_lookup[ngram]:
                             task_doc_set = duplicates[(task_name, task_set)]
-                            for (
-                                doc_id
-                            ) in (
-                                doc_ids
-                            ):  # Record contamination across all relevant task/set combos
+                            for doc_id in doc_ids:  # Record contamination across all relevant task/set combos
                                 task_doc_set.add(doc_id)
                         del merged_lookup[ngram]  # No point matching again
                     else:
