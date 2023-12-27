@@ -1,36 +1,31 @@
 """
 
-적합 부적합 이유 예측
+채용관련 지식 평가
 관련문서: https://dramancompany.atlassian.net/wiki/spaces/BDCAI/pages/28243296308/RAMA+PeT+Benchmark+Task+5
 
 """
-from lm_eval.base import MultipleChoiceTask
-import json
-from lm_eval.tasks.rama_common import RAMAUtilsMixin
+from lm_eval.api.registry import register_task
+from lm_eval.tasks.rama.rama_common import RAMAUtilsMixin
+from lm_eval.api.task import MultipleChoiceTask
 
 
-class ReasonPrediction(MultipleChoiceTask, RAMAUtilsMixin):
+@register_task("ckp")
+class PredictDefinition(MultipleChoiceTask, RAMAUtilsMixin):
     QUERY = """
-아래 채용공고에 지원한 프로필이 {type}한 이유 대해서 가장 적합한 설명을 고르시오.
-
-{input}
+채용 도메인에서 {type}에 대한 키워드 {input}의 설명중 가장 적합한 것을 고르시오.
 
 정답:    
 """
 
     VERSION = 1.0
-    DATASET_PATH = (
-        "rama_project/rama_benchmark/llm_benchmark/v_{VERSION}/PRP_benchmark.json"
-    )
+    DATASET_PATH = "rama_project/rama_benchmark/llm_benchmark/v_{VERSION}/CKP_benchmark.json"
     DATASET_NAME = None
 
-    def __init__(self):
-        self.dataset = self.load_benchmark_dataset(
-            self.DATASET_PATH.format_map({"VERSION": self.VERSION})
-        )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        self._training_docs = None
-        self._fewshot_docs = None
+    def download(self, data_dir=None, cache_dir=None, download_mode=None) -> None:
+        self.dataset = self.load_benchmark_dataset(self.DATASET_PATH.format_map({"VERSION": self.VERSION}))
 
     def has_training_docs(self):
         return False
@@ -44,9 +39,7 @@ class ReasonPrediction(MultipleChoiceTask, RAMAUtilsMixin):
     def training_docs(self):
         if self.has_training_docs():
             if self._training_docs is None:
-                self._training_docs = list(
-                    map(self._process_doc, self.dataset["train"])
-                )
+                self._training_docs = list(map(self._process_doc, self.dataset["train"]))
             return self._training_docs
 
     def validation_docs(self):

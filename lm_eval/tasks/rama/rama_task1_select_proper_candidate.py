@@ -4,34 +4,33 @@
 관련문서: https://dramancompany.atlassian.net/wiki/spaces/BDCAI/pages/28241461371/RAMA+PET+Benchmark+Task+4
 
 """
-from lm_eval.base import MultipleChoiceTask
-import json
-from lm_eval.tasks.rama_common import RAMAUtilsMixin
+
+from lm_eval.tasks.rama.rama_common import RAMAUtilsMixin
+from lm_eval.api.registry import register_task
+from lm_eval.api.task import MultipleChoiceTask
 
 
-class PredictCategory(MultipleChoiceTask, RAMAUtilsMixin):
+@register_task("spc")
+class SelectProperCandidates(MultipleChoiceTask, RAMAUtilsMixin):
     QUERY = """
 instruction:
-주어진 공고 또는 이력서의 내용 중, target에서 지정한 내용을 담고 있는 지문을 선택하세요.
-적절한 항목이 없다면, 존재하지 않음이라고 답해주세요.
+주어진 채용공고와 회사정보를 고려할때, 더 적절한 후보자를 선택하세요.
  
-target:
-{target}
+공고:
+{jd}
 
-공고/프로필:
-{body}
-
-정답: """
+후보: 
+"""
 
     VERSION = 1.0
-    DATASET_PATH = "rama_project/rama_benchmark/llm_benchmark/v_{VERSION}/RTT_benchmark.json"
+    DATASET_PATH = "rama_project/rama_benchmark/llm_benchmark/v_{VERSION}/SPC_benchmark.json"
     DATASET_NAME = None
 
-    def __init__(self):
-        self.dataset = self.load_benchmark_dataset(self.DATASET_PATH.format_map({"VERSION": self.VERSION}))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        self._training_docs = None
-        self._fewshot_docs = None
+    def download(self, data_dir=None, cache_dir=None, download_mode=None) -> None:
+        self.dataset = self.load_benchmark_dataset(self.DATASET_PATH.format_map({"VERSION": self.VERSION}))
 
     def has_training_docs(self):
         return False
@@ -57,9 +56,10 @@ target:
             return map(self._process_doc, self.dataset["test"])
 
     def _process_doc(self, doc):
-        query = self.QUERY.format_map({"target": doc["target"], "body": doc["body"]})
+        query = self.QUERY.format_map({"jd": doc["jd"]})
 
         return {
+            "type": doc["type"],
             "query": query,
             "choices": doc["candidates"],
             "gold": doc["answer"],

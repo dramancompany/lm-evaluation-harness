@@ -1,5 +1,4 @@
 import os
-import yaml
 from typing import List, Union, Dict
 
 from lm_eval import utils
@@ -25,6 +24,12 @@ from .scrolls.task import (
     SummScreenFD,
     QMSum,
 )
+from .rama.rama_task1_select_proper_candidate import SelectProperCandidates
+from .rama.rama_task2_result_evidence import ReasonPrediction
+from .rama.rama_task4_predict_category import PredictCategory
+from .rama.rama_task5_career_knowledge import PredictDefinition
+from .rama.rama_task6_predict_industries import PredictIndustries
+from .rama.rama_task7_find_similar_company import FindSimilarCompany
 
 eval_logger = utils.eval_logger
 
@@ -84,9 +89,7 @@ def register_configurable_group(config: Dict[str, str], yaml_path: str = None) -
     return 0
 
 
-def check_prompt_config(
-    config: Dict[str, str], yaml_path: str = None
-) -> List[Dict[str, str]]:
+def check_prompt_config(config: Dict[str, str], yaml_path: str = None) -> List[Dict[str, str]]:
     all_configs = []
     if "use_prompt" in config:
         prompt_list = prompts.load_prompt_list(
@@ -103,12 +106,8 @@ def check_prompt_config(
                     **{
                         "task": "_".join(
                             [
-                                config["task"]
-                                if "task" in config
-                                else get_task_name_from_config(config),
-                                prompt_variation.split("/")[-1]
-                                if ".yaml" in prompt_variation
-                                else prompt_variation,
+                                config["task"] if "task" in config else get_task_name_from_config(config),
+                                prompt_variation.split("/")[-1] if ".yaml" in prompt_variation else prompt_variation,
                             ]
                         )
                     },
@@ -142,9 +141,7 @@ def include_task_folder(task_dir: str, register_task: bool = True) -> None:
                     if "task" not in config:
                         continue
 
-                    all_configs = check_prompt_config(
-                        config, yaml_path=os.path.dirname(yaml_path)
-                    )
+                    all_configs = check_prompt_config(config, yaml_path=os.path.dirname(yaml_path))
                     for config in all_configs:
                         if register_task:
                             if type(config["task"]) == str:
@@ -156,9 +153,7 @@ def include_task_folder(task_dir: str, register_task: bool = True) -> None:
                 # Log this silently and show it only when
                 # the user defines the appropriate verbosity.
                 except ModuleNotFoundError as e:
-                    eval_logger.debug(
-                        f"{yaml_path}: {e}. Config will not be added to registry."
-                    )
+                    eval_logger.debug(f"{yaml_path}: {e}. Config will not be added to registry.")
                 except Exception as error:
                     import traceback
 
@@ -202,11 +197,7 @@ def get_task_name_from_object(task_object):
 
     # TODO: scrap this
     # this gives a mechanism for non-registered tasks to have a custom name anyways when reporting
-    return (
-        task_object.EVAL_HARNESS_NAME
-        if hasattr(task_object, "EVAL_HARNESS_NAME")
-        else type(task_object).__name__
-    )
+    return task_object.EVAL_HARNESS_NAME if hasattr(task_object, "EVAL_HARNESS_NAME") else type(task_object).__name__
 
 
 # TODO: pass num_fewshot and other cmdline overrides in a better way
@@ -253,9 +244,7 @@ def get_task_dict(task_name_list: List[Union[str, Dict, Task]], **kwargs):
             task_element.update(config)
             task_name_from_config_dict = {
                 **task_name_from_config_dict,
-                get_task_name_from_config(task_element): ConfigurableTask(
-                    config=task_element
-                ),
+                get_task_name_from_config(task_element): ConfigurableTask(config=task_element),
             }
 
         elif isinstance(task_element, Task):
@@ -264,9 +253,7 @@ def get_task_dict(task_name_list: List[Union[str, Dict, Task]], **kwargs):
                 get_task_name_from_object(task_element): task_element,
             }
 
-    assert set(task_name_from_registry_dict.keys()).isdisjoint(
-        set(task_name_from_object_dict.keys())
-    )
+    assert set(task_name_from_registry_dict.keys()).isdisjoint(set(task_name_from_object_dict.keys()))
     return {
         **task_name_from_registry_dict,
         **task_name_from_config_dict,

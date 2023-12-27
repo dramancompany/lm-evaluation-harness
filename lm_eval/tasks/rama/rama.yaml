@@ -1,0 +1,8 @@
+group: rama
+task:
+  - spc
+  - prp
+  - rtt
+  - ckp
+  - jcp
+  - fsc

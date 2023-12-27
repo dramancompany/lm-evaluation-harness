@@ -1,13 +1,6 @@
 from bdc.utils import call_chatgpt
 from openai.error import InvalidRequestError
-from lm_eval.tasks import (
-    rama_task1_select_proper_candidate,
-    rama_task2_result_evidence,
-    rama_task4_predict_category,
-    rama_task5_career_knowledge,
-    rama_task6_predict_industries,
-    rama_task7_find_similar_company,
-)
+from lm_eval.tasks.rama import rama_task1_select_proper_candidate
 from tqdm import tqdm
 from collections import defaultdict
 import time
