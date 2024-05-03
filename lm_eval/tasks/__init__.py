@@ -30,7 +30,9 @@ from .rama.rama_task4_predict_category import PredictCategory
 from .rama.rama_task5_career_knowledge import PredictDefinition
 from .rama.rama_task6_predict_industries import PredictIndustries
 from .rama.rama_task7_find_similar_company import FindSimilarCompany
-
+from .gorr.gorr_task1_select_correct_with_unconvincing import SelectCorrectOfferMessageUnconvincing
+from .gorr.gorr_task2_select_correct_with_wrong import SelectCorrectOfferMessageWrong
+from .gorr.gorr_task3_select_correct_with_hallucination import SelectCorrectOfferMessageHallucination
 eval_logger = utils.eval_logger
 
 

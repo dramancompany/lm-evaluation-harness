@@ -3,8 +3,8 @@ from lm_eval.api.registry import register_task
 from lm_eval.api.task import MultipleChoiceTask
 
 
-@register_task("scom")
-class SelectCorrectOfferMessage(MultipleChoiceTask, RAMAUtilsMixin):
+@register_task("hallucination")
+class SelectCorrectOfferMessageHallucination(MultipleChoiceTask, GORRUtilsMixin):
     QUERY = """
 instruction:
 주어진 <공고>와 <프로필>을 고려할 때, 가장 적절한 제안 메시지를 선택하세요.
@@ -19,7 +19,7 @@ instruction:
 """
 
     VERSION = 1.0
-    DATASET_PATH = f"llm_evaluation/benchmark/personalized_offer_message/multiple_choice/v_{VERSION}/benchmark.json"
+    DATASET_PATH = f"llm_evaluation/benchmark/personalized_offer_message/multiple_choice/v_{VERSION}/benchmark_hallucination.json"
     DATASET_NAME = None
 
     def __init__(self, *args, **kwargs):

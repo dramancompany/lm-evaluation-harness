@@ -1,3 +1,5 @@
 group: gorr
 task:
-  - scom
+  - unconvincing
+  - wrong
+  - hallucination
